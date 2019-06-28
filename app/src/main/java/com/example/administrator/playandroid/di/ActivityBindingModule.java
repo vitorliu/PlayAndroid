@@ -1,0 +1,19 @@
+package com.example.administrator.playandroid.di;
+
+import com.example.administrator.playandroid.di.annotation.ActivityScope;
+import com.example.administrator.playandroid.di.modules.MainActivityModule;
+import com.example.administrator.playandroid.ui.activity.MainActivity;
+
+import dagger.Module;
+import dagger.android.ContributesAndroidInjector;
+
+/**
+ * Created by Administrator on 2019/6/28.
+ * <p>Copyright 2019 Success101.</p>
+ */
+@Module
+public abstract class ActivityBindingModule {
+    @ActivityScope
+    @ContributesAndroidInjector(modules = {MainActivityModule.class})
+    abstract MainActivity mainActivity();
+}

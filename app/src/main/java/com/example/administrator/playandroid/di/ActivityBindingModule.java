@@ -1,7 +1,10 @@
 package com.example.administrator.playandroid.di;
 
+import android.app.Activity;
+
 import com.example.administrator.playandroid.di.annotation.ActivityScope;
 import com.example.administrator.playandroid.di.modules.MainActivityModule;
+import com.example.administrator.playandroid.ui.activity.H5Activity;
 import com.example.administrator.playandroid.ui.activity.MainActivity;
 
 import dagger.Module;
@@ -16,4 +19,8 @@ public abstract class ActivityBindingModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = {MainActivityModule.class})
     abstract MainActivity mainActivity();
+
+    @ActivityScope
+    @ContributesAndroidInjector()
+    abstract H5Activity h5Activity();
 }

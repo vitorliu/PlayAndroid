@@ -1,7 +1,9 @@
 package com.example.administrator.playandroid.architeture.viewmodel;
 
+import android.arch.core.util.Function;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModel;
 
 import com.example.administrator.playandroid.architeture.repository.HomeRepository;
@@ -26,13 +28,20 @@ public class HomeFragmentViewModel extends ViewModel {
     LiveData<Resource<ResponseInfo<List<HomeCommonUseWebResponse>>>> mLiveDataHomeCommonUseWeb;
     LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> mLiveDataHomeArticleList;
     LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> mLiveDataHomeTopArticleList;
+
+    MutableLiveData<Integer> mMutableLiveDataArticleList=new MutableLiveData<>();
     @Inject
-    public HomeFragmentViewModel(HomeRepository pRepository) {
+    public HomeFragmentViewModel(final HomeRepository pRepository) {
         mLiveDataHomeBanner=pRepository.getHomeBannerData();
         mLiveDataSeacherHotWord=pRepository.getHomeSeacherHotWordData();
         mLiveDataHomeCommonUseWeb=pRepository.getHomeCommonUseWebData();
-        mLiveDataHomeArticleList=pRepository.getHomeArticleListData();
         mLiveDataHomeTopArticleList=pRepository.getHomeTopArticleListData();
+        mLiveDataHomeArticleList= Transformations.switchMap(mMutableLiveDataArticleList, new Function<Integer, LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>>>() {
+            @Override
+            public LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> apply(Integer input) {
+                return pRepository.getHomeArticleListData(input);
+            }
+        });
     }
 
     public LiveData<Resource<ResponseInfo<List<HomeBannerResponse>>>> getLiveDataHomeBanner() {
@@ -53,5 +62,9 @@ public class HomeFragmentViewModel extends ViewModel {
 
     public LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> getLiveDataHomeTopArticleList() {
         return mLiveDataHomeTopArticleList;
+    }
+
+    public void fetchArticleList(int pPage) {
+        mMutableLiveDataArticleList.setValue(pPage);
     }
 }

@@ -12,6 +12,7 @@ import com.example.administrator.playandroid.bean.ResponseInfo;
 import java.util.List;
 
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 
 /**
  * Created by Administrator on 2019/7/2.
@@ -43,8 +44,8 @@ public interface ApiService {
      * 首页文章列表
      * @return
      */
-    @GET("/article/list/1/json")
-    LiveData<ApiResponse<ResponseInfo<List<HomeArticleListResponse>>>> requestHomeArticleList();
+    @GET("/article/list/{page}/json")
+    LiveData<ApiResponse<ResponseInfo<List<HomeArticleListResponse>>>> requestHomeArticleList(@Path("page")int page);
 
     /**
      * 首页置顶文章列表

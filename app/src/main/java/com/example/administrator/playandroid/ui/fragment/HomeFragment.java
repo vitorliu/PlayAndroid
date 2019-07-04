@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
@@ -22,7 +23,6 @@ import com.example.administrator.playandroid.bean.HomeCommonUseWebResponse;
 import com.example.administrator.playandroid.bean.HomeSeacherHotWordResponse;
 import com.example.administrator.playandroid.bean.ResponseInfo;
 import com.example.administrator.playandroid.ui.activity.H5Activity;
-import com.example.administrator.playandroid.ui.view.FullyLinearLayoutManager;
 import com.example.administrator.playandroid.utils.GlideImageLoader;
 import com.youth.banner.Banner;
 import com.youth.banner.listener.OnBannerListener;
@@ -36,6 +36,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Created by Administrator on 2019/6/28.
@@ -44,18 +46,17 @@ import butterknife.BindView;
 public class HomeFragment extends XFragment {
     @Inject
     HomeFragmentViewModel mViewModel;
-    @BindView(R.id.home_banner)
-    Banner homeBanner;
-    @BindView(R.id.home_tag_seacher_hot_word)
-    TagFlowLayout homeTagSeacherHotWord;
-    @BindView(R.id.home_tag_common_use_web)
-    TagFlowLayout homeTagCommonUseWeb;
     @BindView(R.id.home_rv_aticle_list)
     RecyclerView homeRvAticleList;
 
     List<HomeArticleListResponse> mHomeArticleList;
     HomeArticleListAdapter mArticleListAdapter;
     List<HomeArticleListResponse> mHomeTopArticleList;
+
+    Banner homeBanner;
+    TagFlowLayout homeTagSeacherHotWord;
+    TagFlowLayout homeTagCommonUseWeb;
+
     @Inject
     public HomeFragment() {
     }
@@ -72,32 +73,44 @@ public class HomeFragment extends XFragment {
         getSeacherHotWordResult();
         getCommonUseWebResult();
         getTopArticleListResult();
+        getArricleListResult();
 
     }
 
     private void setupRecycle() {
-        mHomeArticleList=new ArrayList<>();
-        mArticleListAdapter=new HomeArticleListAdapter(R.layout.item_home_article_list,mHomeArticleList);
-        FullyLinearLayoutManager vLinearLayoutManager=new FullyLinearLayoutManager(getContext());
+        mHomeArticleList = new ArrayList<>();
+        mArticleListAdapter = new HomeArticleListAdapter(R.layout.item_home_article_list, mHomeArticleList);
+        View headerView = getHeaderView();
+        mArticleListAdapter.addHeaderView(headerView);
+        LinearLayoutManager vLinearLayoutManager = new LinearLayoutManager(getContext());
         homeRvAticleList.setLayoutManager(vLinearLayoutManager);
         homeRvAticleList.setAdapter(mArticleListAdapter);
         mArticleListAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                H5Activity.launch(getContext(),mHomeArticleList.get(position).link);
+                H5Activity.launch(getContext(), mHomeArticleList.get(position).link);
             }
         });
     }
 
+    private View getHeaderView() {
+        View headerView = LayoutInflater.from(getContext()).inflate(R.layout.item_home_header, null);
+        homeBanner=headerView.findViewById(R.id.home_banner);
+        homeTagSeacherHotWord=headerView.findViewById(R.id.home_tag_seacher_hot_word);
+        homeTagCommonUseWeb=headerView.findViewById(R.id.home_tag_common_use_web);
+        return headerView;
+    }
+
     private void getArricleListResult() {
+        mViewModel.fetchArticleList(0);
         mViewModel.getLiveDataHomeArticleList().observe(this, new Observer<Resource<ResponseInfo<List<HomeArticleListResponse>>>>() {
             @Override
             public void onChanged(@Nullable Resource<ResponseInfo<List<HomeArticleListResponse>>> pResponseInfoResource) {
                 ResponseInfo<List<HomeArticleListResponse>> vData = pResponseInfoResource.data;
-                if (vData!=null){
-                    mHomeArticleList.addAll(mHomeTopArticleList.size(),vData.data);
-                    mArticleListAdapter.notifyDataSetChanged();
+                if (vData != null) {
+                    mHomeArticleList.addAll(mHomeTopArticleList!=null?mHomeTopArticleList.size():0, vData.data);
                 }
+                mArticleListAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -107,15 +120,14 @@ public class HomeFragment extends XFragment {
             @Override
             public void onChanged(@Nullable Resource<ResponseInfo<List<HomeArticleListResponse>>> pResponseInfoResource) {
                 ResponseInfo<List<HomeArticleListResponse>> vData = pResponseInfoResource.data;
-                if (vData!=null){
-                    if (mHomeTopArticleList==null){
-                        mHomeTopArticleList=new ArrayList<>();
+                if (vData != null) {
+                    if (mHomeTopArticleList == null) {
+                        mHomeTopArticleList = new ArrayList<>();
                     }
-                    mHomeTopArticleList=vData.data;
-                    mHomeArticleList.addAll(vData.data);
-                 //   mArticleListAdapter.notifyDataSetChanged();
+                    mHomeTopArticleList.addAll(vData.data);
+                    mHomeArticleList.addAll(mHomeTopArticleList);
                 }
-                getArricleListResult();
+
             }
         });
     }
@@ -125,7 +137,7 @@ public class HomeFragment extends XFragment {
             @Override
             public void onChanged(@Nullable Resource<ResponseInfo<List<HomeCommonUseWebResponse>>> pResponseInfoResource) {
                 ResponseInfo<List<HomeCommonUseWebResponse>> vData = pResponseInfoResource.data;
-                if (vData!=null){
+                if (vData != null) {
                     final List<HomeCommonUseWebResponse> dataList = vData.data;
                     homeTagCommonUseWeb.setAdapter(new TagAdapter<HomeCommonUseWebResponse>(dataList) {
                         @Override
@@ -139,7 +151,7 @@ public class HomeFragment extends XFragment {
                     homeTagCommonUseWeb.setOnTagClickListener(new TagFlowLayout.OnTagClickListener() {
                         @Override
                         public boolean onTagClick(View view, int position, FlowLayout parent) {
-                            H5Activity.launch(getContext(),dataList.get(position).link);
+                            H5Activity.launch(getContext(), dataList.get(position).link);
                             return false;
                         }
                     });
@@ -153,7 +165,7 @@ public class HomeFragment extends XFragment {
             @Override
             public void onChanged(@Nullable Resource<ResponseInfo<List<HomeSeacherHotWordResponse>>> pResponseInfoResource) {
                 ResponseInfo<List<HomeSeacherHotWordResponse>> vData = pResponseInfoResource.data;
-                if (vData!=null){
+                if (vData != null) {
                     final List<HomeSeacherHotWordResponse> dataList = vData.data;
                     homeTagSeacherHotWord.setAdapter(new TagAdapter<HomeSeacherHotWordResponse>(dataList) {
                         @Override
@@ -170,10 +182,10 @@ public class HomeFragment extends XFragment {
     }
 
     private TextView getTextView() {
-        TextView tv=new TextView(getActivity());
-        ViewGroup.LayoutParams vLayoutParams = new RadioGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        ((RadioGroup.LayoutParams) vLayoutParams).setMargins(20,10,20,10);
-        tv.setPadding(10,5,10,5);
+        TextView tv = new TextView(getActivity());
+        ViewGroup.LayoutParams vLayoutParams = new RadioGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        ((RadioGroup.LayoutParams) vLayoutParams).setMargins(20, 10, 20, 10);
+        tv.setPadding(10, 5, 10, 5);
         tv.setBackgroundResource(R.drawable.shape_tag_bg);
         tv.setLayoutParams(vLayoutParams);
         return tv;
@@ -213,4 +225,5 @@ public class HomeFragment extends XFragment {
             }
         });
     }
+
 }

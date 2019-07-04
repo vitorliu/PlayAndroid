@@ -51,11 +51,11 @@ public class HomeRepository {
             }
         }.asLiveData();
     }
-    public LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> getHomeArticleListData(){
+    public LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> getHomeArticleListData(final int page){
         return new NetworkBoundNoCacheResource<ResponseInfo<List<HomeArticleListResponse>>>() {
             @Override
             protected LiveData<ApiResponse<ResponseInfo<List<HomeArticleListResponse>>>> createCall() {
-                return mApiService.requestHomeArticleList();
+                return mApiService.requestHomeArticleList(page);
             }
         }.asLiveData();
     }

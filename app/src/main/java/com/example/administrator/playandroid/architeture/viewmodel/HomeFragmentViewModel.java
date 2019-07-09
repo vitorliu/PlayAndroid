@@ -9,6 +9,7 @@ import android.arch.lifecycle.ViewModel;
 import com.example.administrator.playandroid.architeture.repository.HomeRepository;
 import com.example.administrator.playandroid.base.bean.Resource;
 import com.example.administrator.playandroid.bean.HomeArticleListResponse;
+import com.example.administrator.playandroid.bean.HomeArticleResponce;
 import com.example.administrator.playandroid.bean.HomeBannerResponse;
 import com.example.administrator.playandroid.bean.HomeCommonUseWebResponse;
 import com.example.administrator.playandroid.bean.HomeSeacherHotWordResponse;
@@ -26,7 +27,7 @@ public class HomeFragmentViewModel extends ViewModel {
     LiveData<Resource<ResponseInfo<List<HomeBannerResponse>>>> mLiveDataHomeBanner;
     LiveData<Resource<ResponseInfo<List<HomeSeacherHotWordResponse>>>> mLiveDataSeacherHotWord;
     LiveData<Resource<ResponseInfo<List<HomeCommonUseWebResponse>>>> mLiveDataHomeCommonUseWeb;
-    LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> mLiveDataHomeArticleList;
+    LiveData<Resource<ResponseInfo<HomeArticleResponce>>> mLiveDataHomeArticleList;
     LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> mLiveDataHomeTopArticleList;
 
     MutableLiveData<Integer> mMutableLiveDataArticleList=new MutableLiveData<>();
@@ -36,9 +37,9 @@ public class HomeFragmentViewModel extends ViewModel {
         mLiveDataSeacherHotWord=pRepository.getHomeSeacherHotWordData();
         mLiveDataHomeCommonUseWeb=pRepository.getHomeCommonUseWebData();
         mLiveDataHomeTopArticleList=pRepository.getHomeTopArticleListData();
-        mLiveDataHomeArticleList= Transformations.switchMap(mMutableLiveDataArticleList, new Function<Integer, LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>>>() {
+        mLiveDataHomeArticleList= Transformations.switchMap(mMutableLiveDataArticleList, new Function<Integer, LiveData<Resource<ResponseInfo<HomeArticleResponce>>>>() {
             @Override
-            public LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> apply(Integer input) {
+            public LiveData<Resource<ResponseInfo<HomeArticleResponce>>> apply(Integer input) {
                 return pRepository.getHomeArticleListData(input);
             }
         });
@@ -56,7 +57,7 @@ public class HomeFragmentViewModel extends ViewModel {
         return mLiveDataHomeCommonUseWeb;
     }
 
-    public LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> getLiveDataHomeArticleList() {
+    public LiveData<Resource<ResponseInfo<HomeArticleResponce>>> getLiveDataHomeArticleList() {
         return mLiveDataHomeArticleList;
     }
 

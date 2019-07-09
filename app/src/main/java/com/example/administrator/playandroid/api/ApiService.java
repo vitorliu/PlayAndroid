@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 
 import com.example.administrator.playandroid.base.bean.ApiResponse;
 import com.example.administrator.playandroid.bean.HomeArticleListResponse;
+import com.example.administrator.playandroid.bean.HomeArticleResponce;
 import com.example.administrator.playandroid.bean.HomeBannerResponse;
 import com.example.administrator.playandroid.bean.HomeCommonUseWebResponse;
 import com.example.administrator.playandroid.bean.HomeSeacherHotWordResponse;
@@ -45,7 +46,7 @@ public interface ApiService {
      * @return
      */
     @GET("/article/list/{page}/json")
-    LiveData<ApiResponse<ResponseInfo<List<HomeArticleListResponse>>>> requestHomeArticleList(@Path("page")int page);
+    LiveData<ApiResponse<ResponseInfo<HomeArticleResponce>>> requestHomeArticleList(@Path("page")int page);
 
     /**
      * 首页置顶文章列表

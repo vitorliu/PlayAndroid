@@ -1,6 +1,8 @@
 package com.example.administrator.playandroid.adapter;
 
 import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -24,5 +26,8 @@ public class HomeArticleListAdapter extends BaseQuickAdapter<HomeArticleListResp
                 .setText(R.id.item_article_author,item.author)
                 .setText(R.id.item_article_classify,item.superChapterName)
                 .setText(R.id.item_article_time,item.niceDate);
+        TextView vView = helper.getView(R.id.item_top_flag);
+        vView.setVisibility(item.type==1?View.VISIBLE:View.GONE);
+
     }
 }

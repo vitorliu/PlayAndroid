@@ -17,13 +17,25 @@
     android:id="@+id/item_article_title"
     />
     <TextView
+        android:visibility="gone"
+        android:layout_marginLeft="10dp"
+        android:textColor="#E60F0F"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="置顶"
+        android:id="@+id/item_top_flag"
+        app:layout_constraintTop_toBottomOf="@+id/item_article_title"
+        app:layout_constraintLeft_toLeftOf="parent"
+
+        />
+    <TextView
         android:layout_marginLeft="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="author"
         android:textSize="14sp"
         app:layout_constraintTop_toBottomOf="@+id/item_article_title"
-        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/item_top_flag"
         android:id="@+id/item_article_author"
         />
     <TextView

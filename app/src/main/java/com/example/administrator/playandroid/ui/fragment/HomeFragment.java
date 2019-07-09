@@ -2,6 +2,7 @@ package com.example.administrator.playandroid.ui.fragment;
 
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,16 +15,22 @@ import android.widget.TextView;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.example.administrator.playandroid.R;
 import com.example.administrator.playandroid.adapter.HomeArticleListAdapter;
+import com.example.administrator.playandroid.api.NetStatusHelper;
 import com.example.administrator.playandroid.architeture.viewmodel.HomeFragmentViewModel;
 import com.example.administrator.playandroid.base.XFragment;
 import com.example.administrator.playandroid.base.bean.Resource;
 import com.example.administrator.playandroid.bean.HomeArticleListResponse;
+import com.example.administrator.playandroid.bean.HomeArticleResponce;
 import com.example.administrator.playandroid.bean.HomeBannerResponse;
 import com.example.administrator.playandroid.bean.HomeCommonUseWebResponse;
 import com.example.administrator.playandroid.bean.HomeSeacherHotWordResponse;
 import com.example.administrator.playandroid.bean.ResponseInfo;
 import com.example.administrator.playandroid.ui.activity.H5Activity;
 import com.example.administrator.playandroid.utils.GlideImageLoader;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.youth.banner.Banner;
 import com.youth.banner.listener.OnBannerListener;
 import com.zhy.view.flowlayout.FlowLayout;
@@ -44,19 +51,29 @@ import butterknife.Unbinder;
  * <p>Copyright 2019 Success101.</p>
  */
 public class HomeFragment extends XFragment {
-    @Inject
-    HomeFragmentViewModel mViewModel;
+
     @BindView(R.id.home_rv_aticle_list)
     RecyclerView homeRvAticleList;
+    @BindView(R.id.refresh)
+    SmartRefreshLayout refresh;
 
+    @Inject
+    HomeFragmentViewModel mViewModel;
     List<HomeArticleListResponse> mHomeArticleList;
     HomeArticleListAdapter mArticleListAdapter;
-    List<HomeArticleListResponse> mHomeTopArticleList;
 
+    /**
+     * 头部
+     */
     Banner homeBanner;
     TagFlowLayout homeTagSeacherHotWord;
     TagFlowLayout homeTagCommonUseWeb;
+    RecyclerView topRv;
+    HomeArticleListAdapter mTopArticleListAdapter;
+    List<HomeArticleListResponse> mHomeTopArticleList;
 
+
+    int curPage;
     @Inject
     public HomeFragment() {
     }
@@ -68,6 +85,19 @@ public class HomeFragment extends XFragment {
 
     @Override
     public void init(Bundle savedInstanceState) {
+        refresh.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+                curPage=0;
+                mViewModel.fetchArticleList(curPage);
+            }
+        });
+        refresh.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
+                mViewModel.fetchArticleList(++curPage);
+            }
+        });
         setupRecycle();
         getBannerResult();
         getSeacherHotWordResult();
@@ -95,22 +125,53 @@ public class HomeFragment extends XFragment {
 
     private View getHeaderView() {
         View headerView = LayoutInflater.from(getContext()).inflate(R.layout.item_home_header, null);
-        homeBanner=headerView.findViewById(R.id.home_banner);
-        homeTagSeacherHotWord=headerView.findViewById(R.id.home_tag_seacher_hot_word);
-        homeTagCommonUseWeb=headerView.findViewById(R.id.home_tag_common_use_web);
+        homeBanner = headerView.findViewById(R.id.home_banner);
+        homeTagSeacherHotWord = headerView.findViewById(R.id.home_tag_seacher_hot_word);
+        homeTagCommonUseWeb = headerView.findViewById(R.id.home_tag_common_use_web);
+        topRv=headerView.findViewById(R.id.home_top_article);
+        mHomeTopArticleList=new ArrayList<>();
+        mTopArticleListAdapter=new HomeArticleListAdapter(R.layout.item_home_article_list, mHomeTopArticleList);
+        LinearLayoutManager vLinearLayoutManager = new LinearLayoutManager(getContext());
+        topRv.setLayoutManager(vLinearLayoutManager);
+        topRv.setAdapter(mTopArticleListAdapter);
         return headerView;
     }
 
     private void getArricleListResult() {
         mViewModel.fetchArticleList(0);
-        mViewModel.getLiveDataHomeArticleList().observe(this, new Observer<Resource<ResponseInfo<List<HomeArticleListResponse>>>>() {
+        mViewModel.getLiveDataHomeArticleList().observe(this, new Observer<Resource<ResponseInfo<HomeArticleResponce>>>() {
             @Override
-            public void onChanged(@Nullable Resource<ResponseInfo<List<HomeArticleListResponse>>> pResponseInfoResource) {
-                ResponseInfo<List<HomeArticleListResponse>> vData = pResponseInfoResource.data;
-                if (vData != null) {
-                    mHomeArticleList.addAll(mHomeTopArticleList!=null?mHomeTopArticleList.size():0, vData.data);
-                }
-                mArticleListAdapter.notifyDataSetChanged();
+            public void onChanged(@Nullable Resource<ResponseInfo<HomeArticleResponce>> pResponseInfoResource) {
+                refresh.finishRefresh();
+                refresh.finishLoadMore();
+                NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<HomeArticleResponce>>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<HomeArticleResponce> resource) {
+                        if (curPage==0){
+                            mHomeArticleList.clear();
+                        }
+                        HomeArticleResponce vData = resource.data;
+                        if (vData != null) {
+                            mHomeArticleList.addAll(vData.datas);
+                        }
+                        mArticleListAdapter.notifyDataSetChanged();
+                        if (vData.over){
+                            refresh.setEnableLoadMore(false);
+                        }
+                    }
+
+                    @Override
+                    public void onLoading() {
+
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                });
+
+
             }
         });
     }
@@ -119,14 +180,29 @@ public class HomeFragment extends XFragment {
         mViewModel.getLiveDataHomeTopArticleList().observe(this, new Observer<Resource<ResponseInfo<List<HomeArticleListResponse>>>>() {
             @Override
             public void onChanged(@Nullable Resource<ResponseInfo<List<HomeArticleListResponse>>> pResponseInfoResource) {
-                ResponseInfo<List<HomeArticleListResponse>> vData = pResponseInfoResource.data;
-                if (vData != null) {
-                    if (mHomeTopArticleList == null) {
-                        mHomeTopArticleList = new ArrayList<>();
+
+                NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeArticleListResponse>>>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<List<HomeArticleListResponse>> resource) {
+
+                        List<HomeArticleListResponse> vData = resource.data;
+                        if (vData != null) {
+                            mHomeTopArticleList.addAll(vData);
+                        }
+                        mTopArticleListAdapter.notifyDataSetChanged();
                     }
-                    mHomeTopArticleList.addAll(vData.data);
-                    mHomeArticleList.addAll(mHomeTopArticleList);
-                }
+
+                    @Override
+                    public void onLoading() {
+
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                });
+
 
             }
         });
@@ -136,26 +212,42 @@ public class HomeFragment extends XFragment {
         mViewModel.getLiveDataHomeCommonUseWeb().observe(this, new Observer<Resource<ResponseInfo<List<HomeCommonUseWebResponse>>>>() {
             @Override
             public void onChanged(@Nullable Resource<ResponseInfo<List<HomeCommonUseWebResponse>>> pResponseInfoResource) {
-                ResponseInfo<List<HomeCommonUseWebResponse>> vData = pResponseInfoResource.data;
-                if (vData != null) {
-                    final List<HomeCommonUseWebResponse> dataList = vData.data;
-                    homeTagCommonUseWeb.setAdapter(new TagAdapter<HomeCommonUseWebResponse>(dataList) {
-                        @Override
-                        public View getView(FlowLayout parent, int position, HomeCommonUseWebResponse pHomeCommonUseWebResponse) {
-                            TextView tv = getTextView();
-                            tv.setText(pHomeCommonUseWebResponse.name);
-                            return tv;
-                        }
+                NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeCommonUseWebResponse>>>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<List<HomeCommonUseWebResponse>> resource) {
+                        final List<HomeCommonUseWebResponse> vData = resource.data;
+                        if (vData != null) {
+                            homeTagCommonUseWeb.setAdapter(new TagAdapter<HomeCommonUseWebResponse>(vData) {
+                                @Override
+                                public View getView(FlowLayout parent, int position, HomeCommonUseWebResponse pHomeCommonUseWebResponse) {
+                                    TextView tv = getTextView();
+                                    tv.setText(pHomeCommonUseWebResponse.name);
+                                    return tv;
+                                }
 
-                    });
-                    homeTagCommonUseWeb.setOnTagClickListener(new TagFlowLayout.OnTagClickListener() {
-                        @Override
-                        public boolean onTagClick(View view, int position, FlowLayout parent) {
-                            H5Activity.launch(getContext(), dataList.get(position).link);
-                            return false;
+                            });
+                            homeTagCommonUseWeb.setOnTagClickListener(new TagFlowLayout.OnTagClickListener() {
+                                @Override
+                                public boolean onTagClick(View view, int position, FlowLayout parent) {
+                                    H5Activity.launch(getContext(), vData.get(position).link);
+                                    return false;
+                                }
+                            });
                         }
-                    });
-                }
+                    }
+
+                    @Override
+                    public void onLoading() {
+
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                });
+
+
             }
         });
     }
@@ -164,19 +256,35 @@ public class HomeFragment extends XFragment {
         mViewModel.getLiveDataSeacherHotWord().observe(this, new Observer<Resource<ResponseInfo<List<HomeSeacherHotWordResponse>>>>() {
             @Override
             public void onChanged(@Nullable Resource<ResponseInfo<List<HomeSeacherHotWordResponse>>> pResponseInfoResource) {
-                ResponseInfo<List<HomeSeacherHotWordResponse>> vData = pResponseInfoResource.data;
-                if (vData != null) {
-                    final List<HomeSeacherHotWordResponse> dataList = vData.data;
-                    homeTagSeacherHotWord.setAdapter(new TagAdapter<HomeSeacherHotWordResponse>(dataList) {
-                        @Override
-                        public View getView(FlowLayout parent, int position, HomeSeacherHotWordResponse pHomeSeacherHotWordResponse) {
-                            TextView tv = getTextView();
-                            tv.setText(pHomeSeacherHotWordResponse.name);
-                            return tv;
-                        }
+                NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeSeacherHotWordResponse>>>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<List<HomeSeacherHotWordResponse>> resource) {
+                        List<HomeSeacherHotWordResponse> vData = resource.data;
+                        if (vData != null) {
+                            homeTagSeacherHotWord.setAdapter(new TagAdapter<HomeSeacherHotWordResponse>(vData) {
+                                @Override
+                                public View getView(FlowLayout parent, int position, HomeSeacherHotWordResponse pHomeSeacherHotWordResponse) {
+                                    TextView tv = getTextView();
+                                    tv.setText(pHomeSeacherHotWordResponse.name);
+                                    return tv;
+                                }
 
-                    });
-                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onLoading() {
+
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                });
+
+
             }
         });
     }
@@ -195,33 +303,47 @@ public class HomeFragment extends XFragment {
         mViewModel.getLiveDataHomeBanner().observe(this, new Observer<Resource<ResponseInfo<List<HomeBannerResponse>>>>() {
             @Override
             public void onChanged(@Nullable Resource<ResponseInfo<List<HomeBannerResponse>>> pResponseInfoResource) {
-                //设置图片加载器
-                ResponseInfo<List<HomeBannerResponse>> vData = pResponseInfoResource.data;
-                List<String> images = new ArrayList<>();
-                final List<String> urlList = new ArrayList<>();
-                if (vData != null) {
-                    List<HomeBannerResponse> vBannerResponseList = vData.data;
-                    if (vBannerResponseList != null) {
-                        for (int i = 0; i < vBannerResponseList.size(); i++) {
-                            HomeBannerResponse vHomeBannerResponse = vBannerResponseList.get(i);
-                            if (vHomeBannerResponse != null) {
-                                images.add(vHomeBannerResponse.imagePath);
-                                urlList.add(vHomeBannerResponse.url);
+                NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeBannerResponse>>>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<List<HomeBannerResponse>> resource) {
+                        //设置图片加载器
+                        List<HomeBannerResponse> vData = resource.data;
+                        List<String> images = new ArrayList<>();
+                        final List<String> urlList = new ArrayList<>();
+                        if (vData != null) {
+                            if (vData != null) {
+                                for (int i = 0; i < vData.size(); i++) {
+                                    HomeBannerResponse vHomeBannerResponse = vData.get(i);
+                                    if (vHomeBannerResponse != null) {
+                                        images.add(vHomeBannerResponse.imagePath);
+                                        urlList.add(vHomeBannerResponse.url);
+                                    }
+                                }
                             }
                         }
+                        homeBanner.setOnBannerListener(new OnBannerListener() {
+                            @Override
+                            public void OnBannerClick(int position) {
+                                H5Activity.launch(getActivity(), urlList.get(position));
+                            }
+                        });
+                        homeBanner.setImageLoader(new GlideImageLoader());
+                        //设置图片集合
+                        homeBanner.setImages(images);
+                        //banner设置方法全部调用完毕时最后调用
+                        homeBanner.start();
                     }
-                }
-                homeBanner.setOnBannerListener(new OnBannerListener() {
+
                     @Override
-                    public void OnBannerClick(int position) {
-                        H5Activity.launch(getActivity(), urlList.get(position));
+                    public void onLoading() {
+
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
                     }
                 });
-                homeBanner.setImageLoader(new GlideImageLoader());
-                //设置图片集合
-                homeBanner.setImages(images);
-                //banner设置方法全部调用完毕时最后调用
-                homeBanner.start();
             }
         });
     }

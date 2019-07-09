@@ -7,6 +7,7 @@ import com.example.administrator.playandroid.base.bean.ApiResponse;
 import com.example.administrator.playandroid.base.bean.Resource;
 import com.example.administrator.playandroid.base.repository.NetworkBoundNoCacheResource;
 import com.example.administrator.playandroid.bean.HomeArticleListResponse;
+import com.example.administrator.playandroid.bean.HomeArticleResponce;
 import com.example.administrator.playandroid.bean.HomeBannerResponse;
 import com.example.administrator.playandroid.bean.HomeCommonUseWebResponse;
 import com.example.administrator.playandroid.bean.HomeSeacherHotWordResponse;
@@ -51,10 +52,10 @@ public class HomeRepository {
             }
         }.asLiveData();
     }
-    public LiveData<Resource<ResponseInfo<List<HomeArticleListResponse>>>> getHomeArticleListData(final int page){
-        return new NetworkBoundNoCacheResource<ResponseInfo<List<HomeArticleListResponse>>>() {
+    public LiveData<Resource<ResponseInfo<HomeArticleResponce>>> getHomeArticleListData(final int page){
+        return new NetworkBoundNoCacheResource<ResponseInfo<HomeArticleResponce>>() {
             @Override
-            protected LiveData<ApiResponse<ResponseInfo<List<HomeArticleListResponse>>>> createCall() {
+            protected LiveData<ApiResponse<ResponseInfo<HomeArticleResponce>>> createCall() {
                 return mApiService.requestHomeArticleList(page);
             }
         }.asLiveData();

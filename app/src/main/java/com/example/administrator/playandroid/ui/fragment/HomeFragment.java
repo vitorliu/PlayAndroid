@@ -134,6 +134,12 @@ public class HomeFragment extends XFragment {
         LinearLayoutManager vLinearLayoutManager = new LinearLayoutManager(getContext());
         topRv.setLayoutManager(vLinearLayoutManager);
         topRv.setAdapter(mTopArticleListAdapter);
+        mTopArticleListAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                H5Activity.launch(getContext(), mHomeTopArticleList.get(position).link);
+            }
+        });
         return headerView;
     }
 

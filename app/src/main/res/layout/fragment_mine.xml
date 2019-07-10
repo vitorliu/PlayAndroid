@@ -1,11 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="我的"
-        android:gravity="center"
+        android:layout_height="120dp"
+        android:background="@color/colorPrimary"
+        >
+        <TextView
+            android:layout_marginLeft="20dp"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/icon_header"
+            android:text="点击登录"
+            android:gravity="center_vertical"
+            android:drawablePadding="10dp"
+            android:textColor="#fff"
+            android:id="@+id/tv_header"
+            />
+    </FrameLayout>
+    <TextView
+        android:id="@+id/tv_collect"
+        android:paddingRight="10dp"
+        android:drawableRight="@drawable/icon_right"
+        android:paddingLeft="10dp"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="我的收藏"
         />
-</android.support.constraint.ConstraintLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#858383"
+        android:layout_marginLeft="10dp"
+        />
+    <TextView
+        android:id="@+id/tv_todo"
+        android:paddingRight="10dp"
+        android:drawableRight="@drawable/icon_right"
+        android:paddingLeft="10dp"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="TODO工具"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#858383"
+        android:layout_marginLeft="10dp"
+        />
+</LinearLayout>

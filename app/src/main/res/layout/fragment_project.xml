@@ -11,7 +11,7 @@
     app:ddunderlineColor="@color/gray"
     app:ddmenuSelectedIcon="@mipmap/drop_down_selected_icon"
     app:ddmenuUnselectedIcon="@mipmap/drop_down_unselected_icon"
-    app:ddmaskColor="@color/gray"
+    app:ddmaskColor="@color/mask_color"
     app:ddmenuBackgroundColor="@color/white"
     app:ddmenuMenuHeightPercent="0.5">
 

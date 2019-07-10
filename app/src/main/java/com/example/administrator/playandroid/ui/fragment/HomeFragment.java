@@ -143,6 +143,11 @@ public class HomeFragment extends XFragment {
         return headerView;
     }
 
+    @Override
+    protected boolean isShowStateView() {
+        return true;
+    }
+
     private void getArricleListResult() {
         mViewModel.fetchArticleList(0);
         mViewModel.getLiveDataHomeArticleList().observe(this, new Observer<Resource<ResponseInfo<HomeArticleResponce>>>() {
@@ -153,13 +158,15 @@ public class HomeFragment extends XFragment {
                 NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<HomeArticleResponce>>() {
                     @Override
                     public void onSuccess(ResponseInfo<HomeArticleResponce> resource) {
+                        HomeArticleResponce vData = resource.data;
+                        if (vData==null){
+                            mArticleListAdapter.setEmptyView(emptyView);
+                            return;
+                        }
                         if (curPage==0){
                             mHomeArticleList.clear();
                         }
-                        HomeArticleResponce vData = resource.data;
-                        if (vData != null) {
-                            mHomeArticleList.addAll(vData.datas);
-                        }
+                        mHomeArticleList.addAll(vData.datas);
                         mArticleListAdapter.notifyDataSetChanged();
                         if (vData.over){
                             refresh.setEnableLoadMore(false);
@@ -168,12 +175,12 @@ public class HomeFragment extends XFragment {
 
                     @Override
                     public void onLoading() {
-
+                        mArticleListAdapter.setEmptyView(loadingView);
                     }
 
                     @Override
                     public void onError(String errorMessage) {
-
+                        mArticleListAdapter.setEmptyView(errorView);
                     }
                 });
 

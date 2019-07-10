@@ -70,7 +70,7 @@ public class KnowleageHierachyFragment extends XFragment {
     @Override
     public void init(Bundle savedInstanceState) {
         headerList=new ArrayList<>(1);
-        headerList.add("分类");
+        headerList.add("选择知识体系类别");
 
         popuviews=new ArrayList<>(1);
         View menuView = getMenuView();

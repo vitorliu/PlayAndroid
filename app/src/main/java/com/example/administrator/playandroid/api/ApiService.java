@@ -9,6 +9,9 @@ import com.example.administrator.playandroid.bean.HomeArticleResponce;
 import com.example.administrator.playandroid.bean.HomeBannerResponse;
 import com.example.administrator.playandroid.bean.HomeCommonUseWebResponse;
 import com.example.administrator.playandroid.bean.HomeSeacherHotWordResponse;
+import com.example.administrator.playandroid.bean.NavigationResponce;
+import com.example.administrator.playandroid.bean.ProjectClassifyResponce;
+import com.example.administrator.playandroid.bean.ProjectListResponce;
 import com.example.administrator.playandroid.bean.ResponseInfo;
 
 import java.util.List;
@@ -72,4 +75,27 @@ public interface ApiService {
      */
     @GET("/article/list/{page}/json")
     LiveData<ApiResponse<ResponseInfo<HomeArticleResponce>>> requestHierachyArticleList(@Path("page")int page, @Query("cid")int cid);
+
+    /**
+     * 获取导航数据
+     * @return
+     */
+    @GET("/navi/json")
+    LiveData<ApiResponse<ResponseInfo<List<NavigationResponce>>>>requestNavigationDataList();
+
+    /**
+     * 获取项目分类
+     * @return
+     */
+    @GET("/project/tree/json")
+    LiveData<ApiResponse<ResponseInfo<List<ProjectClassifyResponce>>>>requestProjectClassifyList();
+
+    /**
+     * 获取分类下的项目列表
+     * @param page
+     * @param cid
+     * @return
+     */
+    @GET("/project/list/{page}/json")
+    LiveData<ApiResponse<ResponseInfo<ProjectListResponce>>>requestProjectList(@Path("page")int page,@Query("cid")int cid);
 }

@@ -5,6 +5,8 @@ import android.arch.lifecycle.ViewModel;
 
 import com.example.administrator.playandroid.architeture.viewmodel.HierachyViewModel;
 import com.example.administrator.playandroid.architeture.viewmodel.HomeFragmentViewModel;
+import com.example.administrator.playandroid.architeture.viewmodel.NavigationViewModel;
+import com.example.administrator.playandroid.architeture.viewmodel.ProjectViewModel;
 import com.example.administrator.playandroid.di.annotation.ViewModelKey;
 
 import dagger.Binds;
@@ -26,4 +28,14 @@ public abstract class ViewModelBindingModule {
     @IntoMap
     @ViewModelKey(HierachyViewModel.class)
     abstract ViewModel bindHierachyViewModel(HierachyViewModel pViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(NavigationViewModel.class)
+    abstract ViewModel bindNavigationViewModel(NavigationViewModel pViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ProjectViewModel.class)
+    abstract ViewModel bindProjectViewModel(ProjectViewModel pViewModel);
 }

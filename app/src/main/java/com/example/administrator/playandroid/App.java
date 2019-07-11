@@ -20,14 +20,20 @@ import dagger.android.DaggerApplication;
  * <p>Copyright 2019 Success101.</p>
  */
 public class App extends DaggerApplication {
+    private static App instance;
+
     @Override
     public void onCreate() {
         super.onCreate();
+        instance=this;
     }
-
     @Override
     protected AndroidInjector<? extends DaggerApplication> applicationInjector() {
         return DaggerAppComponent.builder().application(this).build();
+    }
+
+    public static Context getInstance() {
+        return instance;
     }
 
     //static 代码段可以防止内存泄露

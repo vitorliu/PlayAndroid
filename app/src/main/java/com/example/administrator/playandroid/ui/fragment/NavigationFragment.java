@@ -3,16 +3,12 @@ package com.example.administrator.playandroid.ui.fragment;
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.example.administrator.playandroid.R;
 import com.example.administrator.playandroid.adapter.NavigatonAdapter;
-import com.example.administrator.playandroid.api.NetStatusHelper;
+import com.example.administrator.playandroid.api.helper.NetStatusHelper;
 import com.example.administrator.playandroid.architeture.viewmodel.NavigationViewModel;
 import com.example.administrator.playandroid.base.XFragment;
 import com.example.administrator.playandroid.base.bean.Resource;
@@ -26,8 +22,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 
 /**
  * Created by Administrator on 2019/6/28.

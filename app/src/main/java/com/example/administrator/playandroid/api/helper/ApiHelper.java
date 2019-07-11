@@ -1,8 +1,9 @@
-package com.example.administrator.playandroid.api;
+package com.example.administrator.playandroid.api.helper;
 
 import android.content.Context;
 
 import com.example.administrator.playandroid.R;
+import com.example.administrator.playandroid.api.CustomTrustManager;
 
 import java.io.InputStream;
 import java.security.KeyStore;

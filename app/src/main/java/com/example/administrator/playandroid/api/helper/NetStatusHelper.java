@@ -1,4 +1,4 @@
-package com.example.administrator.playandroid.api;
+package com.example.administrator.playandroid.api.helper;
 
 import com.example.administrator.playandroid.base.bean.Resource;
 import com.example.administrator.playandroid.bean.ResponseInfo;

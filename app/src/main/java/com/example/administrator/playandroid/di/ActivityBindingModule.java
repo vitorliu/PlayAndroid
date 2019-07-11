@@ -8,6 +8,7 @@ import com.example.administrator.playandroid.ui.activity.H5Activity;
 import com.example.administrator.playandroid.ui.activity.LoginActivity;
 import com.example.administrator.playandroid.ui.activity.MainActivity;
 import com.example.administrator.playandroid.ui.activity.RegisterActivity;
+import com.example.administrator.playandroid.ui.activity.SettingActivity;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -33,4 +34,8 @@ public abstract class ActivityBindingModule {
     @ActivityScope
     @ContributesAndroidInjector()
     abstract RegisterActivity registerActivity();
+
+    @ActivityScope
+    @ContributesAndroidInjector()
+    abstract SettingActivity settingActivity();
 }

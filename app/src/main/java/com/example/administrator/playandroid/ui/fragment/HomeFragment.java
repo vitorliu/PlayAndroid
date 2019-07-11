@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.example.administrator.playandroid.R;
 import com.example.administrator.playandroid.adapter.HomeArticleListAdapter;
-import com.example.administrator.playandroid.api.NetStatusHelper;
+import com.example.administrator.playandroid.api.helper.NetStatusHelper;
 import com.example.administrator.playandroid.architeture.viewmodel.HomeFragmentViewModel;
 import com.example.administrator.playandroid.base.XFragment;
 import com.example.administrator.playandroid.base.bean.Resource;
@@ -43,8 +43,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 
 /**
  * Created by Administrator on 2019/6/28.

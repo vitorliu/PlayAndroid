@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/tv_about_us"
+        android:paddingRight="10dp"
+        android:drawableRight="@drawable/icon_right"
+        android:paddingLeft="10dp"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="关于我们"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#858383"
+        android:layout_marginLeft="10dp"
+        />
+    <TextView
+        android:textColor="@color/white"
+        android:background="#03A9F4"
+        android:layout_marginTop="50dp"
+        android:id="@+id/tv_login_out"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="退出"
+        />
+
+</LinearLayout>

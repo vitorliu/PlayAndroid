@@ -54,4 +54,14 @@
         android:background="#858383"
         android:layout_marginLeft="10dp"
         />
+    <TextView
+        android:id="@+id/tv_setting"
+        android:paddingRight="10dp"
+        android:drawableRight="@drawable/icon_right"
+        android:paddingLeft="10dp"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="系统设置"
+        />
 </LinearLayout>

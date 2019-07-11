@@ -16,6 +16,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -27,19 +31,23 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
+    def room_version = "1.1.1"
+    implementation "android.arch.persistence.room:runtime:$room_version"
+    annotationProcessor "android.arch.persistence.room:compiler:$room_version"
+    //butterknife
     implementation 'com.jakewharton:butterknife:8.4.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
-
+    //dagger
     implementation 'com.google.dagger:dagger:2.21'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.21'
     implementation 'com.google.dagger:dagger-android:2.21'
     implementation 'com.google.dagger:dagger-android-support:2.21' // if you use the support libraries
     annotationProcessor 'com.google.dagger:dagger-android-processor:2.21'
-
     //retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+  //  implementation 'com.squareup.retrofit2:retrofit-mock:2.4.0'
+  //  implementation 'com.squareup.okhttp3:logging-interceptor:3.4.1'
 
     //glide
     implementation 'com.github.bumptech.glide:glide:4.8.0'
@@ -52,10 +60,12 @@ dependencies {
     implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-14'
     //banner
     implementation 'com.youth.banner:banner:1.4.10'
-
+    //流式布局
     implementation 'com.hyman:flowlayout-lib:1.1.2'
-
+    //adpter
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.30'
-
+    //refresh
     implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-30'
+    //cookiejar
+    implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'
 }

@@ -9,6 +9,7 @@ import com.example.administrator.playandroid.bean.HomeArticleResponce;
 import com.example.administrator.playandroid.bean.HomeBannerResponse;
 import com.example.administrator.playandroid.bean.HomeCommonUseWebResponse;
 import com.example.administrator.playandroid.bean.HomeSeacherHotWordResponse;
+import com.example.administrator.playandroid.bean.UserInfo;
 import com.example.administrator.playandroid.bean.NavigationResponce;
 import com.example.administrator.playandroid.bean.ProjectClassifyResponce;
 import com.example.administrator.playandroid.bean.ProjectListResponce;
@@ -16,7 +17,10 @@ import com.example.administrator.playandroid.bean.ResponseInfo;
 
 import java.util.List;
 
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -98,4 +102,30 @@ public interface ApiService {
      */
     @GET("/project/list/{page}/json")
     LiveData<ApiResponse<ResponseInfo<ProjectListResponce>>>requestProjectList(@Path("page")int page,@Query("cid")int cid);
+
+    /**
+     * 注册
+     * @param
+     * @return
+     */
+    @FormUrlEncoded
+    @POST("/user/register")
+    LiveData<ApiResponse<ResponseInfo>> requestRegister(@Field("username")String username,@Field("password")String password,@Field("repassword")String repassword);
+
+    /**
+     * 登录
+     * @param username
+     * @param password
+     * @return
+     */
+    @FormUrlEncoded
+    @POST("/user/login")
+    LiveData<ApiResponse<ResponseInfo<UserInfo>>> requestLogin(@Field("username")String username, @Field("password")String password);
+
+    /**
+     * 登出
+     * @return
+     */
+    @GET("/user/logout/json")
+    LiveData<ApiResponse<ResponseInfo>> requestLoginOut();
 }

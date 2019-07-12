@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.example.administrator.playandroid.R;
 import com.example.administrator.playandroid.base.XFragment;
 import com.example.administrator.playandroid.bean.UserInfo;
+import com.example.administrator.playandroid.ui.activity.CollectActivity;
 import com.example.administrator.playandroid.ui.activity.LoginActivity;
 import com.example.administrator.playandroid.ui.activity.SettingActivity;
 
@@ -61,6 +62,7 @@ public class MineFragment extends XFragment {
                 startActivity(new Intent(getContext(), LoginActivity.class));
                 break;
             case R.id.tv_collect:
+                startActivity(new Intent(getContext(), CollectActivity.class));
                 break;
             case R.id.tv_todo:
                 break;

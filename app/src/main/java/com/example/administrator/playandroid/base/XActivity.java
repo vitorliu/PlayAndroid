@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,12 +22,19 @@ import dagger.android.support.DaggerAppCompatActivity;
  */
 public abstract class XActivity extends DaggerAppCompatActivity implements UITemplate{
     private Dialog mDialog;
+
+    protected View emptyView;
+    protected View errorView;
+    protected View loadingView;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getLayoutId()>1){
             setContentView(getLayoutId());
             ButterKnife.bind(this);
+        }
+        if (isShowStateView()){
+            setupStateView();
         }
         init(savedInstanceState);
     }
@@ -59,11 +68,38 @@ public abstract class XActivity extends DaggerAppCompatActivity implements UITem
         }
     }
 
-    protected void showToast(String msg) {
+    public void showToast(String msg) {
         Toast vToast = Toast.makeText(this, null, Toast.LENGTH_SHORT);
         vToast.setText(msg);
         vToast.setGravity(Gravity.CENTER,0,0);
         vToast.show();
     }
+    /**
+     * 设置空view、异常view
+     */
+    protected void setupStateView() {
+        loadingView= LayoutInflater.from(this).inflate(R.layout.progress_loadingview_white,null,false);
+        emptyView= LayoutInflater.from(this).inflate(R.layout.progress_emptyview_white,null,false);
+        errorView=LayoutInflater.from(this).inflate(R.layout.progress_errorview_white,null,false);
+        errorView.findViewById(R.id.progressCanClickView).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onErrorViewClick();
+            }
+        });
+    }
+    /**
+     * 错误页面点击事件
+     */
+    protected void onErrorViewClick(){
 
+    }
+
+    /**
+     * 是否要显示状态view
+     * @return
+     */
+    protected boolean isShowStateView(){
+        return false;
+    }
 }

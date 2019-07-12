@@ -42,8 +42,21 @@ public class LoginActivity extends XActivity {
       mViewModel.getLiveDataLogin().observe(this, new Observer<Resource<UserInfo>>() {
           @Override
           public void onChanged(@Nullable Resource<UserInfo> pUserInfoResource) {
-              showToast("登录成功");
-              finish();
+              switch (pUserInfoResource.status){
+                  case SUCCESS:
+                      hideSimpleLoading();
+                      showToast("登录成功");
+                      finish();
+                      break;
+                  case LOADING:
+                      showSimpleLoading();
+                      break;
+                  case ERROR:
+                      hideSimpleLoading();
+                      showToast(pUserInfoResource.message);
+                      break;
+              }
+
           }
       });
     }

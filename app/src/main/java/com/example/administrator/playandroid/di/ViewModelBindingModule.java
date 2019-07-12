@@ -3,6 +3,7 @@ package com.example.administrator.playandroid.di;
 import android.arch.lifecycle.ViewModel;
 
 
+import com.example.administrator.playandroid.architeture.viewmodel.CollectViewModel;
 import com.example.administrator.playandroid.architeture.viewmodel.HierachyViewModel;
 import com.example.administrator.playandroid.architeture.viewmodel.HomeFragmentViewModel;
 import com.example.administrator.playandroid.architeture.viewmodel.LoginViewModel;
@@ -57,4 +58,9 @@ public abstract class ViewModelBindingModule {
     @IntoMap
     @ViewModelKey(SettingViewModel.class)
     abstract ViewModel bindSettingViewModel(SettingViewModel pViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(CollectViewModel.class)
+    abstract ViewModel bindCollectViewModel(CollectViewModel pViewModel);
 }

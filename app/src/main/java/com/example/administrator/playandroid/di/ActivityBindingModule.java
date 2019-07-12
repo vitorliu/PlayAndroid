@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import com.example.administrator.playandroid.di.annotation.ActivityScope;
 import com.example.administrator.playandroid.di.modules.MainActivityModule;
+import com.example.administrator.playandroid.ui.activity.CollectActivity;
 import com.example.administrator.playandroid.ui.activity.H5Activity;
 import com.example.administrator.playandroid.ui.activity.LoginActivity;
 import com.example.administrator.playandroid.ui.activity.MainActivity;
@@ -38,4 +39,8 @@ public abstract class ActivityBindingModule {
     @ActivityScope
     @ContributesAndroidInjector()
     abstract SettingActivity settingActivity();
+
+    @ActivityScope
+    @ContributesAndroidInjector()
+    abstract CollectActivity collectActivity();
 }

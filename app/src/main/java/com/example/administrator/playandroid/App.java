@@ -2,6 +2,8 @@ package com.example.administrator.playandroid;
 
 import android.content.Context;
 
+import com.example.administrator.playandroid.architeture.room.UserInfoDao;
+import com.example.administrator.playandroid.bean.UserInfo;
 import com.example.administrator.playandroid.di.DaggerAppComponent;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.DefaultRefreshFooterCreator;
@@ -12,6 +14,8 @@ import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter;
 import com.scwang.smartrefresh.layout.header.ClassicsHeader;
 
+import javax.inject.Inject;
+
 import dagger.android.AndroidInjector;
 import dagger.android.DaggerApplication;
 
@@ -21,7 +25,8 @@ import dagger.android.DaggerApplication;
  */
 public class App extends DaggerApplication {
     private static App instance;
-
+    @Inject
+    UserInfoDao mUserInfoDao;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -32,7 +37,7 @@ public class App extends DaggerApplication {
         return DaggerAppComponent.builder().application(this).build();
     }
 
-    public static Context getInstance() {
+    public static App getInstance() {
         return instance;
     }
 
@@ -55,4 +60,9 @@ public class App extends DaggerApplication {
             }
         });
     }
+
+    public UserInfoDao getUserInfoDao() {
+        return mUserInfoDao;
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.example.administrator.playandroid.ui.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,6 +14,7 @@ import com.example.administrator.playandroid.ui.fragment.KnowleageHierachyFragme
 import com.example.administrator.playandroid.ui.fragment.MineFragment;
 import com.example.administrator.playandroid.ui.fragment.NavigationFragment;
 import com.example.administrator.playandroid.ui.fragment.ProjectFragment;
+import com.example.administrator.playandroid.utils.GlobalUtils;
 
 import javax.inject.Inject;
 
@@ -84,4 +86,11 @@ public class MainActivity extends XActivity {
         vFragmentTransaction.commit();
     }
 
+    public boolean checkLogin() {
+        if (!GlobalUtils.isLogin()){
+            startActivity(new Intent(this, LoginActivity.class));
+            return true;
+        }
+        return false;
+    }
 }

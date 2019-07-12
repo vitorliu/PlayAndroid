@@ -1,6 +1,7 @@
 package com.example.administrator.playandroid.ui.fragment;
 
 import android.arch.lifecycle.Observer;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.example.administrator.playandroid.R;
 import com.example.administrator.playandroid.adapter.HomeArticleListAdapter;
 import com.example.administrator.playandroid.api.helper.NetStatusHelper;
+import com.example.administrator.playandroid.architeture.viewmodel.CollectViewModel;
 import com.example.administrator.playandroid.architeture.viewmodel.HomeFragmentViewModel;
 import com.example.administrator.playandroid.base.XFragment;
 import com.example.administrator.playandroid.base.bean.Resource;
@@ -26,9 +28,13 @@ import com.example.administrator.playandroid.bean.HomeCommonUseWebResponse;
 import com.example.administrator.playandroid.bean.HomeSeacherHotWordResponse;
 import com.example.administrator.playandroid.bean.ResponseInfo;
 import com.example.administrator.playandroid.ui.activity.H5Activity;
+import com.example.administrator.playandroid.ui.activity.LoginActivity;
+import com.example.administrator.playandroid.ui.activity.MainActivity;
 import com.example.administrator.playandroid.utils.GlideImageLoader;
+import com.example.administrator.playandroid.utils.GlobalUtils;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.header.BezierRadarHeader;
 import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.youth.banner.Banner;
@@ -54,7 +60,8 @@ public class HomeFragment extends XFragment {
     RecyclerView homeRvAticleList;
     @BindView(R.id.refresh)
     SmartRefreshLayout refresh;
-
+    @Inject
+    CollectViewModel mCollectViewModel;
     @Inject
     HomeFragmentViewModel mViewModel;
     List<HomeArticleListResponse> mHomeArticleList;
@@ -72,6 +79,8 @@ public class HomeFragment extends XFragment {
 
 
     int curPage;
+    int topArticleCollectPosition=-1;
+    int nomalArticleCollectPosition=-1;
     @Inject
     public HomeFragment() {
     }
@@ -83,26 +92,69 @@ public class HomeFragment extends XFragment {
 
     @Override
     public void init(Bundle savedInstanceState) {
-        refresh.setOnRefreshListener(new OnRefreshListener() {
-            @Override
-            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                curPage=0;
-                mViewModel.fetchArticleList(curPage);
-            }
-        });
-        refresh.setOnLoadMoreListener(new OnLoadMoreListener() {
-            @Override
-            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-                mViewModel.fetchArticleList(++curPage);
-            }
-        });
+        setRefresh();
         setupRecycle();
         getBannerResult();
         getSeacherHotWordResult();
         getCommonUseWebResult();
         getTopArticleListResult();
         getArricleListResult();
+        getCollectResult();
+        getUncollectResult();
+    }
 
+    private void getCollectResult() {
+        mCollectViewModel.getLiveDataCollect().observe(this, pResponseInfoResource -> {
+            switch (pResponseInfoResource.status){
+                case SUCCESS:
+                    ((MainActivity)getActivity()).showToast("收藏成功");
+                    if (nomalArticleCollectPosition!=-1){
+                        HomeArticleListResponse vHomeArticleListResponse = mHomeArticleList.get(nomalArticleCollectPosition);
+                        vHomeArticleListResponse.collect=true;
+                        mArticleListAdapter.notifyDataSetChanged();
+                    }
+                    if (topArticleCollectPosition!=-1){
+                        HomeArticleListResponse vHomeArticleListResponse = mHomeTopArticleList.get(topArticleCollectPosition);
+                        vHomeArticleListResponse.collect=true;
+                        mTopArticleListAdapter.notifyDataSetChanged();
+                    }
+                    break;
+                case ERROR:
+                    ((MainActivity)getActivity()).showToast(pResponseInfoResource.data.errorMsg);
+                    break;
+            }
+        });
+    }
+
+    private void getUncollectResult() {
+        mCollectViewModel.getLiveDataUncollect().observe(this, pResponseInfoResource -> {
+            switch (pResponseInfoResource.status){
+                case SUCCESS:
+                    ((MainActivity)getActivity()).showToast("取消收藏成功");
+                    if (nomalArticleCollectPosition!=-1){
+                        HomeArticleListResponse vHomeArticleListResponse = mHomeArticleList.get(nomalArticleCollectPosition);
+                        vHomeArticleListResponse.collect=false;
+                        mArticleListAdapter.notifyDataSetChanged();
+                    }
+                    if (topArticleCollectPosition!=-1){
+                        HomeArticleListResponse vHomeArticleListResponse = mHomeTopArticleList.get(topArticleCollectPosition);
+                        vHomeArticleListResponse.collect=false;
+                        mTopArticleListAdapter.notifyDataSetChanged();
+                    }
+                    break;
+                case ERROR:
+                    ((MainActivity)getActivity()).showToast(pResponseInfoResource.data.errorMsg);
+                    break;
+            }
+        });
+    }
+
+    private void setRefresh() {
+        refresh.setOnRefreshListener(refreshLayout -> {
+            curPage=0;
+            mViewModel.fetchArticleList(curPage);
+        });
+        refresh.setOnLoadMoreListener(refreshLayout -> mViewModel.fetchArticleList(++curPage));
     }
 
     private void setupRecycle() {
@@ -113,32 +165,53 @@ public class HomeFragment extends XFragment {
         LinearLayoutManager vLinearLayoutManager = new LinearLayoutManager(getContext());
         homeRvAticleList.setLayoutManager(vLinearLayoutManager);
         homeRvAticleList.setAdapter(mArticleListAdapter);
-        mArticleListAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                H5Activity.launch(getContext(), mHomeArticleList.get(position).link);
+        mArticleListAdapter.setOnItemClickListener((adapter, view, position) -> H5Activity.launch(getContext(), mHomeArticleList.get(position).link));
+        mArticleListAdapter.setOnItemChildClickListener((adapter, view, position) -> {
+            if (((MainActivity)getActivity()).checkLogin())return;
+            HomeArticleListResponse vHomeArticleListResponse = mHomeArticleList.get(position);
+            nomalArticleCollectPosition=position;
+            if (vHomeArticleListResponse.collect){
+                uncollectArticle(vHomeArticleListResponse.id);
+            }else {
+                collectArticle(vHomeArticleListResponse.id);
             }
         });
     }
+
+
 
     private View getHeaderView() {
         View headerView = LayoutInflater.from(getContext()).inflate(R.layout.item_home_header, null);
         homeBanner = headerView.findViewById(R.id.home_banner);
         homeTagSeacherHotWord = headerView.findViewById(R.id.home_tag_seacher_hot_word);
         homeTagCommonUseWeb = headerView.findViewById(R.id.home_tag_common_use_web);
+
         topRv=headerView.findViewById(R.id.home_top_article);
         mHomeTopArticleList=new ArrayList<>();
         mTopArticleListAdapter=new HomeArticleListAdapter(R.layout.item_home_article_list, mHomeTopArticleList);
         LinearLayoutManager vLinearLayoutManager = new LinearLayoutManager(getContext());
         topRv.setLayoutManager(vLinearLayoutManager);
         topRv.setAdapter(mTopArticleListAdapter);
-        mTopArticleListAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                H5Activity.launch(getContext(), mHomeTopArticleList.get(position).link);
+        mTopArticleListAdapter.setOnItemClickListener((adapter, view, position) -> H5Activity.launch(getContext(), mHomeTopArticleList.get(position).link));
+        mTopArticleListAdapter.setOnItemChildClickListener((adapter, view, position) -> {
+            if (((MainActivity)getActivity()).checkLogin())return;
+            HomeArticleListResponse vHomeArticleListResponse = mHomeTopArticleList.get(position);
+            topArticleCollectPosition=position;
+            if (vHomeArticleListResponse.collect){
+                uncollectArticle(vHomeArticleListResponse.id);
+            }else {
+                collectArticle(vHomeArticleListResponse.id);
             }
         });
         return headerView;
+    }
+
+    private void collectArticle(int id) {
+        mCollectViewModel.collect(id);
+    }
+
+    private void uncollectArticle(int id) {
+        mCollectViewModel.unCollect(id);
     }
 
     @Override
@@ -148,156 +221,128 @@ public class HomeFragment extends XFragment {
 
     private void getArricleListResult() {
         mViewModel.fetchArticleList(0);
-        mViewModel.getLiveDataHomeArticleList().observe(this, new Observer<Resource<ResponseInfo<HomeArticleResponce>>>() {
-            @Override
-            public void onChanged(@Nullable Resource<ResponseInfo<HomeArticleResponce>> pResponseInfoResource) {
-                refresh.finishRefresh();
-                refresh.finishLoadMore();
-                NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<HomeArticleResponce>>() {
-                    @Override
-                    public void onSuccess(ResponseInfo<HomeArticleResponce> resource) {
-                        HomeArticleResponce vData = resource.data;
-                        if (vData==null){
-                            mArticleListAdapter.setEmptyView(emptyView);
-                            return;
-                        }
-                        if (curPage==0){
-                            mHomeArticleList.clear();
-                        }
-                        mHomeArticleList.addAll(vData.datas);
-                        mArticleListAdapter.notifyDataSetChanged();
-                        if (vData.over){
-                            refresh.setEnableLoadMore(false);
-                        }
+        mViewModel.getLiveDataHomeArticleList().observe(this, pResponseInfoResource -> {
+            refresh.finishRefresh();
+            refresh.finishLoadMore();
+            NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<HomeArticleResponce>>() {
+                @Override
+                public void onSuccess(ResponseInfo<HomeArticleResponce> resource) {
+                    HomeArticleResponce vData = resource.data;
+                    if (vData==null){
+                        mArticleListAdapter.setEmptyView(emptyView);
+                        return;
                     }
-
-                    @Override
-                    public void onLoading() {
-                        mArticleListAdapter.setEmptyView(loadingView);
+                    if (curPage==0){
+                        mHomeArticleList.clear();
                     }
-
-                    @Override
-                    public void onError(String errorMessage) {
-                        mArticleListAdapter.setEmptyView(errorView);
+                    mHomeArticleList.addAll(vData.datas);
+                    mArticleListAdapter.notifyDataSetChanged();
+                    if (vData.over){
+                        refresh.setEnableLoadMore(false);
                     }
-                });
+                }
+
+                @Override
+                public void onLoading() {
+                    mArticleListAdapter.setEmptyView(loadingView);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    mArticleListAdapter.setEmptyView(errorView);
+                }
+            });
 
 
-            }
         });
     }
 
     private void getTopArticleListResult() {
-        mViewModel.getLiveDataHomeTopArticleList().observe(this, new Observer<Resource<ResponseInfo<List<HomeArticleListResponse>>>>() {
+        mViewModel.getLiveDataHomeTopArticleList().observe(this, pResponseInfoResource -> NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeArticleListResponse>>>() {
             @Override
-            public void onChanged(@Nullable Resource<ResponseInfo<List<HomeArticleListResponse>>> pResponseInfoResource) {
+            public void onSuccess(ResponseInfo<List<HomeArticleListResponse>> resource) {
 
-                NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeArticleListResponse>>>() {
-                    @Override
-                    public void onSuccess(ResponseInfo<List<HomeArticleListResponse>> resource) {
+                List<HomeArticleListResponse> vData = resource.data;
+                if (vData != null) {
+                    mHomeTopArticleList.addAll(vData);
+                }
+                mTopArticleListAdapter.notifyDataSetChanged();
+            }
 
-                        List<HomeArticleListResponse> vData = resource.data;
-                        if (vData != null) {
-                            mHomeTopArticleList.addAll(vData);
-                        }
-                        mTopArticleListAdapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onLoading() {
-
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-
-                    }
-                });
-
+            @Override
+            public void onLoading() {
 
             }
-        });
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        }));
     }
 
     private void getCommonUseWebResult() {
-        mViewModel.getLiveDataHomeCommonUseWeb().observe(this, new Observer<Resource<ResponseInfo<List<HomeCommonUseWebResponse>>>>() {
+        mViewModel.getLiveDataHomeCommonUseWeb().observe(this, pResponseInfoResource -> NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeCommonUseWebResponse>>>() {
             @Override
-            public void onChanged(@Nullable Resource<ResponseInfo<List<HomeCommonUseWebResponse>>> pResponseInfoResource) {
-                NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeCommonUseWebResponse>>>() {
-                    @Override
-                    public void onSuccess(ResponseInfo<List<HomeCommonUseWebResponse>> resource) {
-                        final List<HomeCommonUseWebResponse> vData = resource.data;
-                        if (vData != null) {
-                            homeTagCommonUseWeb.setAdapter(new TagAdapter<HomeCommonUseWebResponse>(vData) {
-                                @Override
-                                public View getView(FlowLayout parent, int position, HomeCommonUseWebResponse pHomeCommonUseWebResponse) {
-                                    TextView tv = getTextView();
-                                    tv.setText(pHomeCommonUseWebResponse.name);
-                                    return tv;
-                                }
-
-                            });
-                            homeTagCommonUseWeb.setOnTagClickListener(new TagFlowLayout.OnTagClickListener() {
-                                @Override
-                                public boolean onTagClick(View view, int position, FlowLayout parent) {
-                                    H5Activity.launch(getContext(), vData.get(position).link);
-                                    return false;
-                                }
-                            });
+            public void onSuccess(ResponseInfo<List<HomeCommonUseWebResponse>> resource) {
+                final List<HomeCommonUseWebResponse> vData = resource.data;
+                if (vData != null) {
+                    homeTagCommonUseWeb.setAdapter(new TagAdapter<HomeCommonUseWebResponse>(vData) {
+                        @Override
+                        public View getView(FlowLayout parent, int position, HomeCommonUseWebResponse pHomeCommonUseWebResponse) {
+                            TextView tv = getTextView();
+                            tv.setText(pHomeCommonUseWebResponse.name);
+                            return tv;
                         }
-                    }
 
-                    @Override
-                    public void onLoading() {
+                    });
+                    homeTagCommonUseWeb.setOnTagClickListener((view, position, parent) -> {
+                        H5Activity.launch(getContext(), vData.get(position).link);
+                        return false;
+                    });
+                }
+            }
 
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-
-                    }
-                });
-
+            @Override
+            public void onLoading() {
 
             }
-        });
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        }));
     }
 
     private void getSeacherHotWordResult() {
-        mViewModel.getLiveDataSeacherHotWord().observe(this, new Observer<Resource<ResponseInfo<List<HomeSeacherHotWordResponse>>>>() {
+        mViewModel.getLiveDataSeacherHotWord().observe(this, pResponseInfoResource -> NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeSeacherHotWordResponse>>>() {
             @Override
-            public void onChanged(@Nullable Resource<ResponseInfo<List<HomeSeacherHotWordResponse>>> pResponseInfoResource) {
-                NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeSeacherHotWordResponse>>>() {
-                    @Override
-                    public void onSuccess(ResponseInfo<List<HomeSeacherHotWordResponse>> resource) {
-                        List<HomeSeacherHotWordResponse> vData = resource.data;
-                        if (vData != null) {
-                            homeTagSeacherHotWord.setAdapter(new TagAdapter<HomeSeacherHotWordResponse>(vData) {
-                                @Override
-                                public View getView(FlowLayout parent, int position, HomeSeacherHotWordResponse pHomeSeacherHotWordResponse) {
-                                    TextView tv = getTextView();
-                                    tv.setText(pHomeSeacherHotWordResponse.name);
-                                    return tv;
-                                }
-
-                            });
+            public void onSuccess(ResponseInfo<List<HomeSeacherHotWordResponse>> resource) {
+                List<HomeSeacherHotWordResponse> vData = resource.data;
+                if (vData != null) {
+                    homeTagSeacherHotWord.setAdapter(new TagAdapter<HomeSeacherHotWordResponse>(vData) {
+                        @Override
+                        public View getView(FlowLayout parent, int position, HomeSeacherHotWordResponse pHomeSeacherHotWordResponse) {
+                            TextView tv = getTextView();
+                            tv.setText(pHomeSeacherHotWordResponse.name);
+                            return tv;
                         }
-                    }
 
-                    @Override
-                    public void onLoading() {
+                    });
+                }
+            }
 
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-
-                    }
-                });
-
+            @Override
+            public void onLoading() {
 
             }
-        });
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        }));
     }
 
     private TextView getTextView() {
@@ -311,52 +356,47 @@ public class HomeFragment extends XFragment {
     }
 
     private void getBannerResult() {
-        mViewModel.getLiveDataHomeBanner().observe(this, new Observer<Resource<ResponseInfo<List<HomeBannerResponse>>>>() {
+        mViewModel.getLiveDataHomeBanner().observe(this, pResponseInfoResource -> NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeBannerResponse>>>() {
             @Override
-            public void onChanged(@Nullable Resource<ResponseInfo<List<HomeBannerResponse>>> pResponseInfoResource) {
-                NetStatusHelper.handStatus(pResponseInfoResource, new NetStatusHelper.StatusCallBack<ResponseInfo<List<HomeBannerResponse>>>() {
-                    @Override
-                    public void onSuccess(ResponseInfo<List<HomeBannerResponse>> resource) {
-                        //设置图片加载器
-                        List<HomeBannerResponse> vData = resource.data;
-                        List<String> images = new ArrayList<>();
-                        final List<String> urlList = new ArrayList<>();
-                        if (vData != null) {
-                            if (vData != null) {
-                                for (int i = 0; i < vData.size(); i++) {
-                                    HomeBannerResponse vHomeBannerResponse = vData.get(i);
-                                    if (vHomeBannerResponse != null) {
-                                        images.add(vHomeBannerResponse.imagePath);
-                                        urlList.add(vHomeBannerResponse.url);
-                                    }
-                                }
+            public void onSuccess(ResponseInfo<List<HomeBannerResponse>> resource) {
+                //设置图片加载器
+                List<HomeBannerResponse> vData = resource.data;
+                List<String> images = new ArrayList<>();
+                final List<String> urlList = new ArrayList<>();
+                if (vData != null) {
+                    if (vData != null) {
+                        for (int i = 0; i < vData.size(); i++) {
+                            HomeBannerResponse vHomeBannerResponse = vData.get(i);
+                            if (vHomeBannerResponse != null) {
+                                images.add(vHomeBannerResponse.imagePath);
+                                urlList.add(vHomeBannerResponse.url);
                             }
                         }
-                        homeBanner.setOnBannerListener(new OnBannerListener() {
-                            @Override
-                            public void OnBannerClick(int position) {
-                                H5Activity.launch(getActivity(), urlList.get(position));
-                            }
-                        });
-                        homeBanner.setImageLoader(new GlideImageLoader());
-                        //设置图片集合
-                        homeBanner.setImages(images);
-                        //banner设置方法全部调用完毕时最后调用
-                        homeBanner.start();
                     }
-
+                }
+                homeBanner.setOnBannerListener(new OnBannerListener() {
                     @Override
-                    public void onLoading() {
-
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-
+                    public void OnBannerClick(int position) {
+                        H5Activity.launch(getActivity(), urlList.get(position));
                     }
                 });
+                homeBanner.setImageLoader(new GlideImageLoader());
+                //设置图片集合
+                homeBanner.setImages(images);
+                //banner设置方法全部调用完毕时最后调用
+                homeBanner.start();
             }
-        });
+
+            @Override
+            public void onLoading() {
+
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        }));
     }
 
 }

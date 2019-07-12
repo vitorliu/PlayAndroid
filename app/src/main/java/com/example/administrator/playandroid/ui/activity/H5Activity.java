@@ -21,7 +21,6 @@ import com.example.administrator.playandroid.R;
 import com.example.administrator.playandroid.base.XActivity;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
 
 /**
@@ -47,7 +46,7 @@ public class H5Activity extends XActivity {
 
     @Override
     public int getLayoutId() {
-        return R.layout.html_five;
+        return R.layout.activity_html_five;
     }
 
     @Override

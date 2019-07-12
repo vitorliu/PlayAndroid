@@ -4,19 +4,10 @@
     android:paddingRight="10dp"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <ImageView
-        android:layout_marginLeft="10dp"
-        android:id="@+id/iv_collect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/no_collect"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+
 <TextView
     app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintLeft_toRightOf="@+id/iv_collect"
+    app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
@@ -75,5 +66,18 @@
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:background="#7C7C7C"
+        />
+    <TextView
+        android:padding="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="取消收藏"
+        android:textColor="@color/white"
+        android:background="@drawable/shape_collect_bg"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        android:layout_marginRight="10dp"
+        android:id="@+id/tv_cancel"
         />
 </android.support.constraint.ConstraintLayout>

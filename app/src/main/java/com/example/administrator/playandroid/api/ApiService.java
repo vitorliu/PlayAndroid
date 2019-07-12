@@ -3,6 +3,7 @@ package com.example.administrator.playandroid.api;
 import android.arch.lifecycle.LiveData;
 
 import com.example.administrator.playandroid.base.bean.ApiResponse;
+import com.example.administrator.playandroid.bean.CollectArticleResponse;
 import com.example.administrator.playandroid.bean.HierachyClassifyResponce;
 import com.example.administrator.playandroid.bean.HomeArticleListResponse;
 import com.example.administrator.playandroid.bean.HomeArticleResponce;
@@ -128,4 +129,38 @@ public interface ApiService {
      */
     @GET("/user/logout/json")
     LiveData<ApiResponse<ResponseInfo>> requestLoginOut();
+
+    /**
+     * 收藏文章
+     * @param id
+     * @return
+     */
+    @POST("/lg/collect/{id}/json")
+    LiveData<ApiResponse<ResponseInfo>>requestCollect(@Path("id")int id);
+
+    /**
+     * 取消收藏
+     * @param id
+     * @return
+     */
+    @POST("/lg/uncollect_originId/{id}/json")
+    LiveData<ApiResponse<ResponseInfo>>requestUncollect(@Path("id")int id);
+
+    /**
+     * 收藏文章列表
+     * @param page
+     * @return
+     */
+    @GET("/lg/collect/list/{page}/json")
+    LiveData<ApiResponse<ResponseInfo<CollectArticleResponse>>>requestCollectArticle(@Path("page") int page);
+
+
+    /**
+     * 收藏列表中取消收藏
+     * @param id
+     * @return
+     */
+    @FormUrlEncoded
+    @POST("/lg/uncollect/{id}/json")
+    LiveData<ApiResponse<ResponseInfo>>requestCollectListUncollect(@Path("id")int id,@Field("originId")int originId);
 }

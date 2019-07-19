@@ -1,26 +1,21 @@
 package com.example.administrator.playandroid.ui.fragment;
 
-import android.arch.lifecycle.Observer;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.example.administrator.playandroid.R;
 import com.example.administrator.playandroid.adapter.HomeArticleListAdapter;
 import com.example.administrator.playandroid.api.helper.NetStatusHelper;
 import com.example.administrator.playandroid.architeture.viewmodel.CollectViewModel;
 import com.example.administrator.playandroid.architeture.viewmodel.HomeFragmentViewModel;
 import com.example.administrator.playandroid.base.XFragment;
-import com.example.administrator.playandroid.base.bean.Resource;
 import com.example.administrator.playandroid.bean.HomeArticleListResponse;
 import com.example.administrator.playandroid.bean.HomeArticleResponce;
 import com.example.administrator.playandroid.bean.HomeBannerResponse;
@@ -28,15 +23,9 @@ import com.example.administrator.playandroid.bean.HomeCommonUseWebResponse;
 import com.example.administrator.playandroid.bean.HomeSeacherHotWordResponse;
 import com.example.administrator.playandroid.bean.ResponseInfo;
 import com.example.administrator.playandroid.ui.activity.H5Activity;
-import com.example.administrator.playandroid.ui.activity.LoginActivity;
 import com.example.administrator.playandroid.ui.activity.MainActivity;
 import com.example.administrator.playandroid.utils.GlideImageLoader;
-import com.example.administrator.playandroid.utils.GlobalUtils;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
-import com.scwang.smartrefresh.layout.api.RefreshLayout;
-import com.scwang.smartrefresh.layout.header.BezierRadarHeader;
-import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
-import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.youth.banner.Banner;
 import com.youth.banner.listener.OnBannerListener;
 import com.zhy.view.flowlayout.FlowLayout;
@@ -49,6 +38,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Created by Administrator on 2019/6/28.
@@ -79,8 +70,12 @@ public class HomeFragment extends XFragment {
 
 
     int curPage;
-    int topArticleCollectPosition=-1;
-    int nomalArticleCollectPosition=-1;
+    int topArticleCollectPosition = -1;
+    int nomalArticleCollectPosition = -1;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+
     @Inject
     public HomeFragment() {
     }
@@ -92,6 +87,7 @@ public class HomeFragment extends XFragment {
 
     @Override
     public void init(Bundle savedInstanceState) {
+        ((MainActivity) getActivity()).setTitle(toolbar,"首页");
         setRefresh();
         setupRecycle();
         getBannerResult();
@@ -105,22 +101,22 @@ public class HomeFragment extends XFragment {
 
     private void getCollectResult() {
         mCollectViewModel.getLiveDataCollect().observe(this, pResponseInfoResource -> {
-            switch (pResponseInfoResource.status){
+            switch (pResponseInfoResource.status) {
                 case SUCCESS:
-                    ((MainActivity)getActivity()).showToast("收藏成功");
-                    if (nomalArticleCollectPosition!=-1){
+                    ((MainActivity) getActivity()).showToast("收藏成功");
+                    if (nomalArticleCollectPosition != -1) {
                         HomeArticleListResponse vHomeArticleListResponse = mHomeArticleList.get(nomalArticleCollectPosition);
-                        vHomeArticleListResponse.collect=true;
+                        vHomeArticleListResponse.collect = true;
                         mArticleListAdapter.notifyDataSetChanged();
                     }
-                    if (topArticleCollectPosition!=-1){
+                    if (topArticleCollectPosition != -1) {
                         HomeArticleListResponse vHomeArticleListResponse = mHomeTopArticleList.get(topArticleCollectPosition);
-                        vHomeArticleListResponse.collect=true;
+                        vHomeArticleListResponse.collect = true;
                         mTopArticleListAdapter.notifyDataSetChanged();
                     }
                     break;
                 case ERROR:
-                    ((MainActivity)getActivity()).showToast(pResponseInfoResource.data.errorMsg);
+                    ((MainActivity) getActivity()).showToast(pResponseInfoResource.data.errorMsg);
                     break;
             }
         });
@@ -128,22 +124,22 @@ public class HomeFragment extends XFragment {
 
     private void getUncollectResult() {
         mCollectViewModel.getLiveDataUncollect().observe(this, pResponseInfoResource -> {
-            switch (pResponseInfoResource.status){
+            switch (pResponseInfoResource.status) {
                 case SUCCESS:
-                    ((MainActivity)getActivity()).showToast("取消收藏成功");
-                    if (nomalArticleCollectPosition!=-1){
+                    ((MainActivity) getActivity()).showToast("取消收藏成功");
+                    if (nomalArticleCollectPosition != -1) {
                         HomeArticleListResponse vHomeArticleListResponse = mHomeArticleList.get(nomalArticleCollectPosition);
-                        vHomeArticleListResponse.collect=false;
+                        vHomeArticleListResponse.collect = false;
                         mArticleListAdapter.notifyDataSetChanged();
                     }
-                    if (topArticleCollectPosition!=-1){
+                    if (topArticleCollectPosition != -1) {
                         HomeArticleListResponse vHomeArticleListResponse = mHomeTopArticleList.get(topArticleCollectPosition);
-                        vHomeArticleListResponse.collect=false;
+                        vHomeArticleListResponse.collect = false;
                         mTopArticleListAdapter.notifyDataSetChanged();
                     }
                     break;
                 case ERROR:
-                    ((MainActivity)getActivity()).showToast(pResponseInfoResource.data.errorMsg);
+                    ((MainActivity) getActivity()).showToast(pResponseInfoResource.data.errorMsg);
                     break;
             }
         });
@@ -151,7 +147,7 @@ public class HomeFragment extends XFragment {
 
     private void setRefresh() {
         refresh.setOnRefreshListener(refreshLayout -> {
-            curPage=0;
+            curPage = 0;
             mViewModel.fetchArticleList(curPage);
         });
         refresh.setOnLoadMoreListener(refreshLayout -> mViewModel.fetchArticleList(++curPage));
@@ -167,17 +163,16 @@ public class HomeFragment extends XFragment {
         homeRvAticleList.setAdapter(mArticleListAdapter);
         mArticleListAdapter.setOnItemClickListener((adapter, view, position) -> H5Activity.launch(getContext(), mHomeArticleList.get(position).link));
         mArticleListAdapter.setOnItemChildClickListener((adapter, view, position) -> {
-            if (((MainActivity)getActivity()).checkLogin())return;
+            if (((MainActivity) getActivity()).checkLogin()) return;
             HomeArticleListResponse vHomeArticleListResponse = mHomeArticleList.get(position);
-            nomalArticleCollectPosition=position;
-            if (vHomeArticleListResponse.collect){
+            nomalArticleCollectPosition = position;
+            if (vHomeArticleListResponse.collect) {
                 uncollectArticle(vHomeArticleListResponse.id);
-            }else {
+            } else {
                 collectArticle(vHomeArticleListResponse.id);
             }
         });
     }
-
 
 
     private View getHeaderView() {
@@ -186,20 +181,20 @@ public class HomeFragment extends XFragment {
         homeTagSeacherHotWord = headerView.findViewById(R.id.home_tag_seacher_hot_word);
         homeTagCommonUseWeb = headerView.findViewById(R.id.home_tag_common_use_web);
 
-        topRv=headerView.findViewById(R.id.home_top_article);
-        mHomeTopArticleList=new ArrayList<>();
-        mTopArticleListAdapter=new HomeArticleListAdapter(R.layout.item_home_article_list, mHomeTopArticleList);
+        topRv = headerView.findViewById(R.id.home_top_article);
+        mHomeTopArticleList = new ArrayList<>();
+        mTopArticleListAdapter = new HomeArticleListAdapter(R.layout.item_home_article_list, mHomeTopArticleList);
         LinearLayoutManager vLinearLayoutManager = new LinearLayoutManager(getContext());
         topRv.setLayoutManager(vLinearLayoutManager);
         topRv.setAdapter(mTopArticleListAdapter);
         mTopArticleListAdapter.setOnItemClickListener((adapter, view, position) -> H5Activity.launch(getContext(), mHomeTopArticleList.get(position).link));
         mTopArticleListAdapter.setOnItemChildClickListener((adapter, view, position) -> {
-            if (((MainActivity)getActivity()).checkLogin())return;
+            if (((MainActivity) getActivity()).checkLogin()) return;
             HomeArticleListResponse vHomeArticleListResponse = mHomeTopArticleList.get(position);
-            topArticleCollectPosition=position;
-            if (vHomeArticleListResponse.collect){
+            topArticleCollectPosition = position;
+            if (vHomeArticleListResponse.collect) {
                 uncollectArticle(vHomeArticleListResponse.id);
-            }else {
+            } else {
                 collectArticle(vHomeArticleListResponse.id);
             }
         });
@@ -228,16 +223,16 @@ public class HomeFragment extends XFragment {
                 @Override
                 public void onSuccess(ResponseInfo<HomeArticleResponce> resource) {
                     HomeArticleResponce vData = resource.data;
-                    if (vData==null){
+                    if (vData == null) {
                         mArticleListAdapter.setEmptyView(emptyView);
                         return;
                     }
-                    if (curPage==0){
+                    if (curPage == 0) {
                         mHomeArticleList.clear();
                     }
                     mHomeArticleList.addAll(vData.datas);
                     mArticleListAdapter.notifyDataSetChanged();
-                    if (vData.over){
+                    if (vData.over) {
                         refresh.setEnableLoadMore(false);
                     }
                 }

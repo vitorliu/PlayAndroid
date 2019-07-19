@@ -5,6 +5,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.example.administrator.playandroid.R;
 import com.example.administrator.playandroid.adapter.NavigatonAdapter;
@@ -15,6 +19,7 @@ import com.example.administrator.playandroid.base.bean.Resource;
 import com.example.administrator.playandroid.bean.NavigationHeaderBean;
 import com.example.administrator.playandroid.bean.NavigationResponce;
 import com.example.administrator.playandroid.bean.ResponseInfo;
+import com.example.administrator.playandroid.ui.activity.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +27,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Created by Administrator on 2019/6/28.
@@ -32,6 +39,10 @@ public class NavigationFragment extends XFragment {
     RecyclerView rvNavigation;
     @Inject
     NavigationViewModel mViewModel;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+
     @Inject
     public NavigationFragment() {
     }
@@ -46,9 +57,10 @@ public class NavigationFragment extends XFragment {
 
     @Override
     public void init(Bundle savedInstanceState) {
-        mList=new ArrayList<>();
-        mAdapter=new NavigatonAdapter(R.layout.item_rv_navigation_list,R.layout.item_rv_navigation_header,mList);
-        LinearLayoutManager vLinearLayoutManager=new LinearLayoutManager(getContext());
+        ((MainActivity) getActivity()).setTitle(toolbar,"导航");
+        mList = new ArrayList<>();
+        mAdapter = new NavigatonAdapter(R.layout.item_rv_navigation_list, R.layout.item_rv_navigation_header, mList);
+        LinearLayoutManager vLinearLayoutManager = new LinearLayoutManager(getContext());
         rvNavigation.setLayoutManager(vLinearLayoutManager);
         rvNavigation.setAdapter(mAdapter);
 
@@ -63,12 +75,12 @@ public class NavigationFragment extends XFragment {
                     @Override
                     public void onSuccess(ResponseInfo<List<NavigationResponce>> resource) {
                         List<NavigationResponce> vData = resource.data;
-                        if (vData==null){
+                        if (vData == null) {
                             mAdapter.setEmptyView(emptyView);
-                        }else {
+                        } else {
                             for (int i = 0; i < vData.size(); i++) {
-                                NavigationHeaderBean vBean=new NavigationHeaderBean(true,vData.get(i).name);
-                                NavigationHeaderBean vBean2=new NavigationHeaderBean(vData.get(i));
+                                NavigationHeaderBean vBean = new NavigationHeaderBean(true, vData.get(i).name);
+                                NavigationHeaderBean vBean2 = new NavigationHeaderBean(vData.get(i));
                                 mList.add(vBean);
                                 mList.add(vBean2);
                             }
@@ -94,4 +106,5 @@ public class NavigationFragment extends XFragment {
     protected boolean isShowStateView() {
         return true;
     }
+
 }

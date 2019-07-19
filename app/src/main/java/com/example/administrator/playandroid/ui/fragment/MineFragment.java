@@ -15,6 +15,7 @@ import com.example.administrator.playandroid.base.XFragment;
 import com.example.administrator.playandroid.bean.UserInfo;
 import com.example.administrator.playandroid.ui.activity.CollectActivity;
 import com.example.administrator.playandroid.ui.activity.LoginActivity;
+import com.example.administrator.playandroid.ui.activity.MainActivity;
 import com.example.administrator.playandroid.ui.activity.SettingActivity;
 
 import javax.inject.Inject;
@@ -44,6 +45,7 @@ public class MineFragment extends XFragment {
 
     @Override
     public void init(Bundle savedInstanceState) {
+        ((MainActivity)getActivity()).setTitle("我的");
         mUserInfoLiveData.observe(this, pUserInfo -> {
             if (pUserInfo!=null){
                 tvHeader.setText(pUserInfo.nickname);
